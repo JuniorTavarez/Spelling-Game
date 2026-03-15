@@ -102,6 +102,9 @@
     // 👇 PUT HIS WEEKLY SPELLING WORDS HERE 👇
     const wordList = ["were", "who", "good", "come", "does", "into", "very", "more", "other", "people"];
     
+    // 🔀 THIS SHUFFLES THE LIST EVERY TIME THE PAGE LOADS 🔀
+    wordList.sort(() => Math.random() - 0.5);
+    
     let currentWordIndex = 0;
     let score = 0;
     let currentAnswer = "";
