@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spelling Scramble!</title>
+  <title>Spelling Scramble & Test!</title>
   
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
@@ -20,10 +20,23 @@
     h1 { color: #00838f; font-size: 28px; margin-bottom: 5px; }
     .progress-text { color: #888; font-size: 14px; font-weight: bold; margin-bottom: 20px; }
     
+    /* --- START SCREEN --- */
+    #startScreen { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+    .mode-btn {
+      background-color: #03dac6; color: #000; font-size: 22px; font-weight: bold;
+      padding: 20px; border: none; border-radius: 12px; cursor: pointer;
+      box-shadow: 0 5px 0 #018786; transition: 0.1s;
+    }
+    .mode-btn.test-btn { background-color: #ffb300; box-shadow: 0 5px 0 #ff8f00; }
+    .mode-btn:active { transform: translateY(5px); box-shadow: none; }
+
+    /* --- GAME / TEST UI --- */
+    #mainUI { display: none; }
+
     .action-btn {
-      background-color: #ffb300; color: white; font-size: 20px; font-weight: bold;
+      background-color: #29b6f6; color: white; font-size: 20px; font-weight: bold;
       padding: 15px 30px; border: none; border-radius: 12px; cursor: pointer;
-      margin-bottom: 20px; box-shadow: 0 4px 0 #ff8f00; transition: 0.1s;
+      margin-bottom: 20px; box-shadow: 0 4px 0 #0288d1; transition: 0.1s;
     }
     .action-btn:active { transform: translateY(4px); box-shadow: none; }
     
@@ -41,6 +54,22 @@
     .letter-btn:disabled { background-color: #e0e0e0; box-shadow: none; cursor: not-allowed; color: #9e9e9e;}
     
     #lettersContainer { margin-bottom: 20px; }
+
+    /* TEST MODE INPUT */
+    #testInputContainer { display: none; margin-bottom: 20px; }
+    .test-input {
+      width: 80%; font-size: 32px; text-align: center; border: none;
+      border-bottom: 4px solid #333; padding: 10px; margin-bottom: 20px;
+      font-family: inherit; font-weight: bold; color: #333; background: transparent;
+      outline: none; letter-spacing: 2px; text-transform: lowercase;
+    }
+    .submit-btn {
+      background-color: #4caf50; color: white; font-size: 20px; font-weight: bold;
+      padding: 15px 30px; border: none; border-radius: 12px; cursor: pointer;
+      box-shadow: 0 4px 0 #388e3c; width: 80%;
+    }
+    .submit-btn:active { transform: translateY(4px); box-shadow: none; }
+
     #feedback { font-size: 24px; font-weight: bold; height: 35px; margin-top: 15px; }
     
     .dashboard {
@@ -77,40 +106,77 @@
   <audio id="yaySound" src="https://www.myinstants.com/media/sounds/kids_cheering.mp3" preload="auto"></audio>
 
   <div class="game-container">
-    <h1>🧩 Spelling Puzzle 🧩</h1>
-    <div class="progress-text" id="progressText">Word 1 of ?</div>
+    <h1 id="mainTitle">🧩 Spelling Time 🧩</h1>
     
-    <button class="action-btn" onclick="speakWord()" id="hearWordBtn">🔊 Hear Word</button>
-    <div id="answerBox"></div>
-    <div id="lettersContainer"></div>
-    
-    <button class="reset-btn" id="resetBtn" onclick="resetCurrentWord()">🔄 Oops! Clear Letters</button>
-
-    <div id="feedback"></div>
-    
-    <div class="dashboard" id="gameDashboard">
-      <div class="score-text">Stars: ⭐ <span id="score">0</span></div>
-      <button class="hint-btn" onclick="buyHint()">💡 Buy Hint (-1 ⭐)</button>
+    <div id="startScreen">
+      <p style="color: #666; margin-top: 0;">What are we doing today?</p>
+      <button class="mode-btn" onclick="startApp('game')">🎮 Play Spelling Game</button>
+      <button class="mode-btn test-btn" onclick="startApp('test')">📝 Take Spelling Test</button>
     </div>
 
-    <div id="practiceReport">
-      <h3>🎯 Needs Practice:</h3>
-      <p id="missedWordsList"></p>
-      <div id="chatStatus">💬 Report sent to Google Chat!</div>
+    <div id="mainUI">
+      <div class="progress-text" id="progressText">Word 1 of ?</div>
+      
+      <button class="action-btn" onclick="speakWord()" id="hearWordBtn">🔊 Hear Word</button>
+      
+      <div id="answerBox"></div>
+      <div id="lettersContainer"></div>
+      <button class="reset-btn" id="resetBtn" onclick="resetCurrentWord()">🔄 Oops! Clear Letters</button>
+
+      <div id="testInputContainer">
+        <input type="text" id="testInput" class="test-input" placeholder="Type word here..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+        <br>
+        <button class="submit-btn" onclick="submitTestAnswer()">Submit Answer ➡️</button>
+      </div>
+
+      <div id="feedback"></div>
+      
+      <div class="dashboard" id="gameDashboard">
+        <div class="score-text">Stars: ⭐ <span id="score">0</span></div>
+        <button class="hint-btn" id="hintBtn" onclick="buyHint()">💡 Buy Hint (-1 ⭐)</button>
+      </div>
+
+      <div id="practiceReport">
+        <h3 id="reportTitle">🎯 Needs Practice:</h3>
+        <p id="missedWordsList"></p>
+        <div id="chatStatus">💬 Report sent to Google Chat!</div>
+      </div>
     </div>
   </div>
 
   <script>
-    const wordList = ["were", "who", "good", "come", "does", "into", "very", "more", "other", "people"];
-    wordList.sort(() => Math.random() - 0.5);
+    // 👇 PUT HIS WEEKLY SPELLING WORDS HERE 👇
+    const originalWordList = ["were", "who", "good", "come", "does", "into", "very", "more", "other", "people"];
     
+    let wordList = [];
     let currentWordIndex = 0;
     let score = 0;
     let currentAnswer = "";
     let correctWord = "";
     let missedWords = new Set(); 
+    let activeMode = "game"; // 'game' or 'test'
 
-    window.onload = loadNextWord;
+    // Initializes the app based on what button you click
+    function startApp(mode) {
+      activeMode = mode;
+      
+      // Shuffle the words for this session
+      wordList = [...originalWordList].sort(() => Math.random() - 0.5);
+
+      document.getElementById("startScreen").style.display = "none";
+      document.getElementById("mainUI").style.display = "block";
+
+      if (activeMode === "test") {
+        document.getElementById("mainTitle").innerText = "📝 Spelling Test 📝";
+        document.getElementById("answerBox").style.display = "none";
+        document.getElementById("lettersContainer").style.display = "none";
+        document.getElementById("resetBtn").style.display = "none";
+        document.getElementById("gameDashboard").style.display = "none";
+        document.getElementById("testInputContainer").style.display = "block";
+      }
+
+      loadNextWord();
+    }
 
     function speakWord() {
       if (currentWordIndex < wordList.length) {
@@ -121,124 +187,80 @@
 
     function loadNextWord() {
       if (currentWordIndex >= wordList.length) {
-        document.getElementById("lettersContainer").innerHTML = "";
-        document.getElementById("answerBox").innerText = "🏆 YOU WON! 🏆";
-        document.getElementById("feedback").innerText = "Awesome job today!";
-        document.getElementById("progressText").innerText = "All done!";
-        
-        document.getElementById("hearWordBtn").style.display = "none";
-        document.getElementById("resetBtn").style.display = "none";
-        document.getElementById("gameDashboard").style.display = "none";
-
-        document.getElementById("practiceReport").style.display = "block";
-        
-        let missedText = "";
-        if (missedWords.size > 0) {
-          missedText = Array.from(missedWords).join(", ");
-          document.getElementById("missedWordsList").innerText = missedText;
-        } else {
-          missedText = "None! A perfect score! 🌟";
-          document.getElementById("missedWordsList").innerText = missedText;
-        }
-
-        // Play the big cheer ONLY at the end!
-        try {
-          document.getElementById("yaySound").play();
-        } catch(e) {}
-        
-        // Massive confetti explosion ONLY at the end!
-        confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
-
-        const chatWebhookURL = "https://chat.googleapis.com/v1/spaces/AAQA6stRJYk/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=2B8KzPKO4GYs6rzZcwBFbmCJaWTNds5zqIMHJhdRG1g";
-
-        const chatMessage = missedWords.size > 0 
-          ? "🎯 *Spelling Test Complete!*\n\nWords your son needs to practice:\n" + missedText
-          : "🌟 *Spelling Test Complete!*\n\nPerfect score! No words missed.";
-
-        fetch(chatWebhookURL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json; charset=UTF-8" },
-          body: JSON.stringify({ text: chatMessage })
-        })
-        .then(response => {
-          console.log("Sent to Google Chat!");
-          document.getElementById("chatStatus").style.display = "block";
-        })
-        .catch(error => console.log("Error sending chat", error));
-
+        endSession();
         return;
       }
 
       document.getElementById("progressText").innerText = `Word ${currentWordIndex + 1} of ${wordList.length}`;
       correctWord = wordList[currentWordIndex].toLowerCase();
-      currentAnswer = "";
-      document.getElementById("answerBox").innerText = "";
       document.getElementById("feedback").innerText = "";
       
-      let letters = correctWord.split("");
-      const alphabet = "abcdefghijklmnopqrstuvwxyz";
-      letters.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
-      letters.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
+      if (activeMode === "game") {
+        currentAnswer = "";
+        document.getElementById("answerBox").innerText = "";
+        
+        let letters = correctWord.split("");
+        const alphabet = "abcdefghijklmnopqrstuvwxyz";
+        letters.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
+        letters.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
 
-      for (let i = letters.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [letters[i], letters[j]] = [letters[j], letters[i]];
+        for (let i = letters.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [letters[i], letters[j]] = [letters[j], letters[i]];
+        }
+
+        const container = document.getElementById("lettersContainer");
+        container.innerHTML = ""; 
+        letters.forEach((letter, index) => {
+          let btn = document.createElement("button");
+          btn.innerText = letter;
+          btn.className = "letter-btn";
+          btn.id = "btn-" + index;
+          btn.onclick = function() { addLetter(letter, btn.id); };
+          container.appendChild(btn);
+        });
+
+      } else if (activeMode === "test") {
+        // Clear input, focus it, and automatically read the word out loud
+        const inputField = document.getElementById("testInput");
+        inputField.value = "";
+        inputField.focus();
+        setTimeout(speakWord, 500); // Reads it automatically!
       }
-
-      const container = document.getElementById("lettersContainer");
-      container.innerHTML = ""; 
-      
-      letters.forEach((letter, index) => {
-        let btn = document.createElement("button");
-        btn.innerText = letter;
-        btn.className = "letter-btn";
-        btn.id = "btn-" + index;
-        btn.onclick = function() { addLetter(letter, btn.id); };
-        container.appendChild(btn);
-      });
     }
 
+    // --- GAME MODE LOGIC ---
     function addLetter(letter, buttonId) {
       currentAnswer += letter;
       document.getElementById("answerBox").innerText = currentAnswer.toUpperCase();
       document.getElementById(buttonId).disabled = true;
 
       if (currentAnswer.length === correctWord.length) {
-        checkSpelling();
+        checkSpellingGame();
       }
     }
 
-    function checkSpelling() {
+    function checkSpellingGame() {
       const feedback = document.getElementById("feedback");
       if (currentAnswer === correctWord) {
-        
-        // ONLY speak "Good job!" for individual words (no cheer, no confetti here)
         window.speechSynthesis.speak(new SpeechSynthesisUtterance("Good job!"));
-
         feedback.innerText = "🎉 PERFECT! 🎉";
         feedback.style.color = "#4caf50";
         score++;
         document.getElementById("score").innerText = score;
         currentWordIndex++;
-        
-        setTimeout(loadNextWord, 2000);
+        setTimeout(loadNextWord, 1500);
       } else {
-        // Play the MP3 buzzer
-        try {
-          document.getElementById("failSound").currentTime = 0;
-          document.getElementById("failSound").play(); 
-        } catch(e) {}
-
-        // Speak "Uh oh!"
+        try { document.getElementById("failSound").currentTime = 0; document.getElementById("failSound").play(); } catch(e) {}
         window.speechSynthesis.speak(new SpeechSynthesisUtterance("Uh oh!"));
 
         feedback.innerText = "Oops! Back of the line! 🔄";
         feedback.style.color = "#f44336";
         
         missedWords.add(correctWord);
-        wordList.push(correctWord);
+        wordList.push(correctWord); // Pushes it to the end in Game Mode
         currentWordIndex++;
-        setTimeout(loadNextWord, 2000);
+        setTimeout(loadNextWord, 1500);
       }
     }
 
@@ -253,26 +275,95 @@
     }
 
     function buyHint() {
-      if (score < 1) {
-        alert("You need at least 1 Star ⭐ to buy a hint! Try to guess on your own first.");
-        return;
-      }
-
+      if (score < 1) { alert("You need 1 Star ⭐ to buy a hint!"); return; }
       const nextCorrectLetter = correctWord[currentAnswer.length];
       if (!nextCorrectLetter) return;
-
       const buttons = document.getElementsByClassName("letter-btn");
       for (let i = 0; i < buttons.length; i++) {
-        // The fix is right here: comparing lowercase to lowercase!
         if (buttons[i].innerText.toLowerCase() === nextCorrectLetter.toLowerCase() && !buttons[i].disabled) {
-          score--;
-          document.getElementById("score").innerText = score;
+          score--; document.getElementById("score").innerText = score;
           buttons[i].click();
           document.getElementById("feedback").innerText = "💡 Hint Used!";
           document.getElementById("feedback").style.color = "#9c27b0";
           break; 
         }
       }
+    }
+
+    // --- TEST MODE LOGIC ---
+    function submitTestAnswer() {
+      const guess = document.getElementById("testInput").value.toLowerCase().trim();
+      
+      // Don't let them submit an empty blank
+      if (guess === "") return; 
+
+      if (guess === correctWord) {
+        score++;
+      } else {
+        missedWords.add(correctWord);
+      }
+      
+      // Move on silently and instantly
+      currentWordIndex++;
+      loadNextWord();
+    }
+
+    // --- END OF SESSION ---
+    function endSession() {
+      document.getElementById("lettersContainer").style.display = "none";
+      document.getElementById("answerBox").style.display = "none";
+      document.getElementById("testInputContainer").style.display = "none";
+      document.getElementById("hearWordBtn").style.display = "none";
+      document.getElementById("resetBtn").style.display = "none";
+      document.getElementById("gameDashboard").style.display = "none";
+      document.getElementById("progressText").innerText = "All done!";
+
+      const totalWords = originalWordList.length;
+      const percentage = (score / totalWords) * 100;
+
+      const feedbackEl = document.getElementById("feedback");
+      const reportTitle = document.getElementById("reportTitle");
+
+      if (activeMode === "test") {
+        if (percentage >= 80) {
+          feedbackEl.innerText = `🏆 YOU PASSED! (${percentage}%) 🏆`;
+          feedbackEl.style.color = "#4caf50";
+          try { document.getElementById("yaySound").play(); } catch(e) {}
+          confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+        } else {
+          // Under 80% Motivational Quote
+          feedbackEl.innerText = `Score: ${percentage}%\n💪 Keep practicing! Mistakes help your brain grow. 💪`;
+          feedbackEl.style.color = "#ff9800";
+          reportTitle.innerText = "📚 Let's review these together:";
+        }
+      } else {
+        // Game mode always cheers at the end
+        feedbackEl.innerText = "🏆 YOU WON THE GAME! 🏆";
+        feedbackEl.style.color = "#4caf50";
+        try { document.getElementById("yaySound").play(); } catch(e) {}
+        confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+      }
+
+      // Show Report
+      document.getElementById("practiceReport").style.display = "block";
+      let missedText = missedWords.size > 0 ? Array.from(missedWords).join(", ") : "None! A perfect score! 🌟";
+      document.getElementById("missedWordsList").innerText = missedText;
+
+      // 🚀 Send the Webhook 🚀
+      const chatWebhookURL = "https://chat.googleapis.com/v1/spaces/AAQA6stRJYk/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=2B8KzPKO4GYs6rzZcwBFbmCJaWTNds5zqIMHJhdRG1g";
+      
+      const modeName = activeMode === "test" ? "Test" : "Game";
+      const finalMsg = missedWords.size > 0 
+        ? `🎯 *Spelling ${modeName} Complete!*\nScore: ${percentage}%\n\nWords he needs to practice:\n${missedText}`
+        : `🌟 *Spelling ${modeName} Complete!*\n\nPerfect score (${percentage}%)! No words missed.`;
+
+      fetch(chatWebhookURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=UTF-8" },
+        body: JSON.stringify({ text: finalMsg })
+      })
+      .then(() => { document.getElementById("chatStatus").style.display = "block"; })
+      .catch(err => console.log(err));
     }
   </script>
 </body>
