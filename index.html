@@ -17,25 +17,26 @@
       border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border: 4px solid #4dd0e1;
       position: relative;
     }
-    h1 { color: #00838f; font-size: 28px; margin-bottom: 5px; }
+    h1 { color: #00838f; font-size: 32px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;}
     .progress-text { color: #888; font-size: 14px; font-weight: bold; margin-bottom: 20px; }
     
-    /* --- START SCREEN --- */
+    /* --- START SCREEN (THEMED MULTI-MODE) --- */
     #startScreen { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
     .mode-btn {
-      background-color: #03dac6; color: #000; font-size: 22px; font-weight: bold;
-      padding: 20px; border: none; border-radius: 12px; cursor: pointer;
-      box-shadow: 0 5px 0 #018786; transition: 0.1s;
+      color: white; font-size: 20px; font-weight: bold; padding: 18px; 
+      border: none; border-radius: 12px; cursor: pointer; transition: 0.1s;
+      text-transform: uppercase; letter-spacing: 1px;
     }
-    .mode-btn.test-btn { background-color: #ffb300; box-shadow: 0 5px 0 #ff8f00; }
+    .easy-btn { background-color: #4caf50; box-shadow: 0 5px 0 #388e3c; }
+    .normal-btn { background-color: #29b6f6; box-shadow: 0 5px 0 #0288d1; }
+    .hard-btn { background-color: #ef5350; box-shadow: 0 5px 0 #c62828; }
+    .test-btn { background-color: #ffb300; box-shadow: 0 5px 0 #f57c00; color: #000; }
     .mode-btn:active { transform: translateY(5px); box-shadow: none; }
 
     /* --- GAME / TEST UI --- */
     #mainUI { display: none; }
 
-    .audio-controls {
-      display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
-    }
+    .audio-controls { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
     
     .action-btn {
       background-color: #29b6f6; color: white; font-size: 18px; font-weight: bold;
@@ -111,12 +112,14 @@
   <audio id="yaySound" src="https://www.myinstants.com/media/sounds/kids_cheering.mp3" preload="auto"></audio>
 
   <div class="game-container">
-    <h1 id="mainTitle">🧩 Spelling Time 🧩</h1>
+    <h1 id="mainTitle">⚡ Training Camp ⚡</h1>
     
     <div id="startScreen">
-      <p style="color: #666; margin-top: 0;">What are we doing today?</p>
-      <button class="mode-btn" onclick="startApp('game')">🎮 Play Spelling Game</button>
-      <button class="mode-btn test-btn" onclick="startApp('test')">📝 Take Spelling Test</button>
+      <p style="color: #666; margin-top: 0;">Choose your challenge level:</p>
+      <button class="mode-btn easy-btn" onclick="startApp('easy')">🥷 Ninja Training (Easy)</button>
+      <button class="mode-btn normal-btn" onclick="startApp('normal')">🦸‍♂️ Hero Mission (Normal)</button>
+      <button class="mode-btn hard-btn" onclick="startApp('hard')">🥊 Heavyweight Match (Hard)</button>
+      <button class="mode-btn test-btn" onclick="startApp('test')">🏆 The Boss Fight (Test)</button>
     </div>
 
     <div id="mainUI">
@@ -153,18 +156,17 @@
   </div>
 
   <script>
-    // 👇 NEW FORMAT: PUT HIS WEEKLY SPELLING WORDS & SENTENCES HERE 👇
+    // 👇 HIS NEW WEEKLY SPELLING WORDS 👇
     const originalWordList = [
-      { word: "were", sentence: "We were playing outside." },
-      { word: "who", sentence: "Who is knocking at the door?" },
-      { word: "good", sentence: "You did a very good job." },
-      { word: "come", sentence: "Please come over here." },
-      { word: "does", sentence: "He does all of his homework." },
-      { word: "into", sentence: "The frog jumped into the pond." },
-      { word: "very", sentence: "I am very happy today." },
-      { word: "more", sentence: "Can I please have some more water?" },
-      { word: "other", sentence: "Where is my other shoe?" },
-      { word: "people", sentence: "There are many people at the park." }
+      { word: "your", sentence: "Is this your favorite toy?" },
+      { word: "all", sentence: "We ate all of the pizza." },
+      { word: "also", sentence: "I also want to play outside." },
+      { word: "call", sentence: "I will call my grandma on the phone." },
+      { word: "many", sentence: "How many apples are in the basket?" },
+      { word: "down", sentence: "Please sit down on the chair." },
+      { word: "how", sentence: "Do you know how to ride a bike?" },
+      { word: "now", sentence: "We need to leave right now." },
+      { word: "which", sentence: "Which color do you like best?" }
     ];
     
     let wordList = [];
@@ -173,7 +175,7 @@
     let currentAnswer = "";
     let correctWord = "";
     let missedWords = new Set(); 
-    let activeMode = "game";
+    let activeMode = "normal";
 
     function startApp(mode) {
       activeMode = mode;
@@ -182,8 +184,13 @@
       document.getElementById("startScreen").style.display = "none";
       document.getElementById("mainUI").style.display = "block";
 
+      // Set the title based on the mode!
+      if (activeMode === "easy") document.getElementById("mainTitle").innerText = "🥷 Ninja Training 🥷";
+      if (activeMode === "normal") document.getElementById("mainTitle").innerText = "🦸‍♂️ Hero Mission 🦸‍♂️";
+      if (activeMode === "hard") document.getElementById("mainTitle").innerText = "🥊 Heavyweight Match 🥊";
+
       if (activeMode === "test") {
-        document.getElementById("mainTitle").innerText = "📝 Spelling Test 📝";
+        document.getElementById("mainTitle").innerText = "🏆 The Boss Fight 🏆";
         document.getElementById("answerBox").style.display = "none";
         document.getElementById("lettersContainer").style.display = "none";
         document.getElementById("resetBtn").style.display = "none";
@@ -201,7 +208,6 @@
       }
     }
 
-    // THE NEW SENTENCE FUNCTION
     function speakSentence() {
       if (currentWordIndex < wordList.length) {
         let msg = new SpeechSynthesisUtterance(wordList[currentWordIndex].sentence);
@@ -216,20 +222,27 @@
       }
 
       document.getElementById("progressText").innerText = `Word ${currentWordIndex + 1} of ${wordList.length}`;
-      
-      // We pull the `.word` property out of the object now!
       correctWord = wordList[currentWordIndex].word.toLowerCase();
       document.getElementById("feedback").innerText = "";
       
-      if (activeMode === "game") {
+      if (activeMode === "easy" || activeMode === "normal" || activeMode === "hard") {
         currentAnswer = "";
         document.getElementById("answerBox").innerText = "";
         
         let letters = correctWord.split("");
         const alphabet = "abcdefghijklmnopqrstuvwxyz";
-        letters.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
-        letters.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
+        
+        // 🔥 THE DIFFICULTY LOGIC 🔥
+        let decoyCount = 0;
+        if (activeMode === "normal") decoyCount = 2; // Normal gets 2 decoys
+        if (activeMode === "hard") decoyCount = 5;   // Hard gets 5 decoys!
+        
+        // Add the extra letters based on the mode
+        for (let i = 0; i < decoyCount; i++) {
+          letters.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
+        }
 
+        // Shuffle all the letters together
         for (let i = letters.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [letters[i], letters[j]] = [letters[j], letters[i]];
@@ -282,7 +295,6 @@
         feedback.style.color = "#f44336";
         
         missedWords.add(correctWord);
-        // We push the whole object (word + sentence) to the back of the line
         wordList.push(wordList[currentWordIndex]); 
         
         currentWordIndex++;
@@ -339,7 +351,7 @@
       document.getElementById("progressText").innerText = "All done!";
 
       const totalWords = originalWordList.length;
-      const percentage = (score / totalWords) * 100;
+      const percentage = Math.round((score / totalWords) * 100); // Rounds the percentage nicely
 
       const feedbackEl = document.getElementById("feedback");
       const reportTitle = document.getElementById("reportTitle");
@@ -356,7 +368,7 @@
           reportTitle.innerText = "📚 Let's review these together:";
         }
       } else {
-        feedbackEl.innerText = "🏆 YOU WON THE GAME! 🏆";
+        feedbackEl.innerText = "🏆 YOU WON! 🏆";
         feedbackEl.style.color = "#4caf50";
         try { document.getElementById("yaySound").play(); } catch(e) {}
         confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
@@ -368,10 +380,16 @@
 
       const chatWebhookURL = "https://chat.googleapis.com/v1/spaces/AAQA6stRJYk/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=2B8KzPKO4GYs6rzZcwBFbmCJaWTNds5zqIMHJhdRG1g";
       
-      const modeName = activeMode === "test" ? "Test" : "Game";
+      // Makes the mode name look nice in your Google Chat report!
+      let niceModeName = "Game";
+      if(activeMode === "easy") niceModeName = "Ninja Training (Easy)";
+      if(activeMode === "normal") niceModeName = "Hero Mission (Normal)";
+      if(activeMode === "hard") niceModeName = "Heavyweight Match (Hard)";
+      if(activeMode === "test") niceModeName = "Boss Fight (Test)";
+
       const finalMsg = missedWords.size > 0 
-        ? `🎯 *Spelling ${modeName} Complete!*\nScore: ${percentage}%\n\nWords he needs to practice:\n${missedText}`
-        : `🌟 *Spelling ${modeName} Complete!*\n\nPerfect score (${percentage}%)! No words missed.`;
+        ? `🎯 *Spelling Update: ${niceModeName}*\nScore: ${percentage}%\n\nWords he needs to practice:\n${missedText}`
+        : `🌟 *Spelling Update: ${niceModeName}*\n\nPerfect score (${percentage}%)! No words missed.`;
 
       fetch(chatWebhookURL, {
         method: "POST",
