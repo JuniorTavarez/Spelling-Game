@@ -13,7 +13,7 @@
       background-color: #e0f7fa; margin: 0; padding: 20px;
     }
     .game-container {
-      background-color: white; max-width: 500px; margin: 20px auto; padding: 30px;
+      background-color: white; max-width: 550px; margin: 20px auto; padding: 30px;
       border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border: 4px solid #4dd0e1;
       position: relative;
     }
@@ -33,11 +33,16 @@
     /* --- GAME / TEST UI --- */
     #mainUI { display: none; }
 
-    .action-btn {
-      background-color: #29b6f6; color: white; font-size: 20px; font-weight: bold;
-      padding: 15px 30px; border: none; border-radius: 12px; cursor: pointer;
-      margin-bottom: 20px; box-shadow: 0 4px 0 #0288d1; transition: 0.1s;
+    .audio-controls {
+      display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
     }
+    
+    .action-btn {
+      background-color: #29b6f6; color: white; font-size: 18px; font-weight: bold;
+      padding: 12px 20px; border: none; border-radius: 12px; cursor: pointer;
+      box-shadow: 0 4px 0 #0288d1; transition: 0.1s;
+    }
+    .action-btn.sentence-btn { background-color: #ab47bc; box-shadow: 0 4px 0 #7b1fa2; }
     .action-btn:active { transform: translateY(4px); box-shadow: none; }
     
     #answerBox {
@@ -117,7 +122,10 @@
     <div id="mainUI">
       <div class="progress-text" id="progressText">Word 1 of ?</div>
       
-      <button class="action-btn" onclick="speakWord()" id="hearWordBtn">🔊 Hear Word</button>
+      <div class="audio-controls" id="audioControls">
+        <button class="action-btn" onclick="speakWord()">🔊 Hear Word</button>
+        <button class="action-btn sentence-btn" onclick="speakSentence()">💬 Hear Sentence</button>
+      </div>
       
       <div id="answerBox"></div>
       <div id="lettersContainer"></div>
@@ -145,8 +153,19 @@
   </div>
 
   <script>
-    // 👇 PUT HIS WEEKLY SPELLING WORDS HERE 👇
-    const originalWordList = ["were", "who", "good", "come", "does", "into", "very", "more", "other", "people"];
+    // 👇 NEW FORMAT: PUT HIS WEEKLY SPELLING WORDS & SENTENCES HERE 👇
+    const originalWordList = [
+      { word: "were", sentence: "We were playing outside." },
+      { word: "who", sentence: "Who is knocking at the door?" },
+      { word: "good", sentence: "You did a very good job." },
+      { word: "come", sentence: "Please come over here." },
+      { word: "does", sentence: "He does all of his homework." },
+      { word: "into", sentence: "The frog jumped into the pond." },
+      { word: "very", sentence: "I am very happy today." },
+      { word: "more", sentence: "Can I please have some more water?" },
+      { word: "other", sentence: "Where is my other shoe?" },
+      { word: "people", sentence: "There are many people at the park." }
+    ];
     
     let wordList = [];
     let currentWordIndex = 0;
@@ -154,13 +173,10 @@
     let currentAnswer = "";
     let correctWord = "";
     let missedWords = new Set(); 
-    let activeMode = "game"; // 'game' or 'test'
+    let activeMode = "game";
 
-    // Initializes the app based on what button you click
     function startApp(mode) {
       activeMode = mode;
-      
-      // Shuffle the words for this session
       wordList = [...originalWordList].sort(() => Math.random() - 0.5);
 
       document.getElementById("startScreen").style.display = "none";
@@ -180,7 +196,15 @@
 
     function speakWord() {
       if (currentWordIndex < wordList.length) {
-        let msg = new SpeechSynthesisUtterance(wordList[currentWordIndex]);
+        let msg = new SpeechSynthesisUtterance(wordList[currentWordIndex].word);
+        window.speechSynthesis.speak(msg);
+      }
+    }
+
+    // THE NEW SENTENCE FUNCTION
+    function speakSentence() {
+      if (currentWordIndex < wordList.length) {
+        let msg = new SpeechSynthesisUtterance(wordList[currentWordIndex].sentence);
         window.speechSynthesis.speak(msg);
       }
     }
@@ -192,7 +216,9 @@
       }
 
       document.getElementById("progressText").innerText = `Word ${currentWordIndex + 1} of ${wordList.length}`;
-      correctWord = wordList[currentWordIndex].toLowerCase();
+      
+      // We pull the `.word` property out of the object now!
+      correctWord = wordList[currentWordIndex].word.toLowerCase();
       document.getElementById("feedback").innerText = "";
       
       if (activeMode === "game") {
@@ -221,15 +247,13 @@
         });
 
       } else if (activeMode === "test") {
-        // Clear input, focus it, and automatically read the word out loud
         const inputField = document.getElementById("testInput");
         inputField.value = "";
         inputField.focus();
-        setTimeout(speakWord, 500); // Reads it automatically!
+        setTimeout(speakWord, 500); 
       }
     }
 
-    // --- GAME MODE LOGIC ---
     function addLetter(letter, buttonId) {
       currentAnswer += letter;
       document.getElementById("answerBox").innerText = currentAnswer.toUpperCase();
@@ -258,7 +282,9 @@
         feedback.style.color = "#f44336";
         
         missedWords.add(correctWord);
-        wordList.push(correctWord); // Pushes it to the end in Game Mode
+        // We push the whole object (word + sentence) to the back of the line
+        wordList.push(wordList[currentWordIndex]); 
+        
         currentWordIndex++;
         setTimeout(loadNextWord, 1500);
       }
@@ -290,11 +316,8 @@
       }
     }
 
-    // --- TEST MODE LOGIC ---
     function submitTestAnswer() {
       const guess = document.getElementById("testInput").value.toLowerCase().trim();
-      
-      // Don't let them submit an empty blank
       if (guess === "") return; 
 
       if (guess === correctWord) {
@@ -302,18 +325,15 @@
       } else {
         missedWords.add(correctWord);
       }
-      
-      // Move on silently and instantly
       currentWordIndex++;
       loadNextWord();
     }
 
-    // --- END OF SESSION ---
     function endSession() {
       document.getElementById("lettersContainer").style.display = "none";
       document.getElementById("answerBox").style.display = "none";
       document.getElementById("testInputContainer").style.display = "none";
-      document.getElementById("hearWordBtn").style.display = "none";
+      document.getElementById("audioControls").style.display = "none";
       document.getElementById("resetBtn").style.display = "none";
       document.getElementById("gameDashboard").style.display = "none";
       document.getElementById("progressText").innerText = "All done!";
@@ -331,25 +351,21 @@
           try { document.getElementById("yaySound").play(); } catch(e) {}
           confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
         } else {
-          // Under 80% Motivational Quote
           feedbackEl.innerText = `Score: ${percentage}%\n💪 Keep practicing! Mistakes help your brain grow. 💪`;
           feedbackEl.style.color = "#ff9800";
           reportTitle.innerText = "📚 Let's review these together:";
         }
       } else {
-        // Game mode always cheers at the end
         feedbackEl.innerText = "🏆 YOU WON THE GAME! 🏆";
         feedbackEl.style.color = "#4caf50";
         try { document.getElementById("yaySound").play(); } catch(e) {}
         confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
       }
 
-      // Show Report
       document.getElementById("practiceReport").style.display = "block";
       let missedText = missedWords.size > 0 ? Array.from(missedWords).join(", ") : "None! A perfect score! 🌟";
       document.getElementById("missedWordsList").innerText = missedText;
 
-      // 🚀 Send the Webhook 🚀
       const chatWebhookURL = "https://chat.googleapis.com/v1/spaces/AAQA6stRJYk/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=2B8KzPKO4GYs6rzZcwBFbmCJaWTNds5zqIMHJhdRG1g";
       
       const modeName = activeMode === "test" ? "Test" : "Game";
