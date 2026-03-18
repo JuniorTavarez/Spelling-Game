@@ -20,13 +20,15 @@
     h1 { color: #00838f; font-size: 32px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;}
     .progress-text { color: #888; font-size: 14px; font-weight: bold; margin-bottom: 20px; }
     
-    /* --- START SCREEN (THEMED MULTI-MODE) --- */
-    #startScreen { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+    /* --- START SCREEN --- */
+    #startScreen { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
     .mode-btn {
-      color: white; font-size: 20px; font-weight: bold; padding: 18px; 
+      color: white; font-size: 18px; font-weight: bold; padding: 15px; 
       border: none; border-radius: 12px; cursor: pointer; transition: 0.1s;
       text-transform: uppercase; letter-spacing: 1px;
     }
+    .study-btn { background-color: #9c27b0; box-shadow: 0 5px 0 #7b1fa2; }
+    .memory-btn { background-color: #ff5722; box-shadow: 0 5px 0 #e64a19; }
     .easy-btn { background-color: #4caf50; box-shadow: 0 5px 0 #388e3c; }
     .normal-btn { background-color: #29b6f6; box-shadow: 0 5px 0 #0288d1; }
     .hard-btn { background-color: #ef5350; box-shadow: 0 5px 0 #c62828; }
@@ -35,7 +37,6 @@
 
     /* --- GAME / TEST UI --- */
     #mainUI { display: none; }
-
     .audio-controls { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
     
     .action-btn {
@@ -61,6 +62,17 @@
     
     #lettersContainer { margin-bottom: 20px; }
 
+    /* --- FLASHCARD / MULTIPLE CHOICE UI --- */
+    #mcContainer { display: none; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+    .mc-btn {
+      background-color: #fff; color: #333; font-size: 26px; font-weight: bold;
+      padding: 20px; border: 3px solid #03dac6; border-radius: 15px; cursor: pointer;
+      box-shadow: 0 5px 0 #018786; text-transform: lowercase; transition: 0.1s;
+    }
+    .mc-btn:active { transform: translateY(5px); box-shadow: none; }
+    #countdownTimer { font-size: 60px; font-weight: bold; color: #ff5722; margin: 15px 0; display: none; }
+    #studyMessage { font-size: 20px; color: #9c27b0; font-weight: bold; display: none; margin-bottom: 15px;}
+
     /* TEST MODE INPUT */
     #testInputContainer { display: none; margin-bottom: 20px; }
     .test-input {
@@ -78,29 +90,14 @@
 
     #feedback { font-size: 24px; font-weight: bold; height: 35px; margin-top: 15px; }
     
-    .dashboard {
-      display: flex; justify-content: space-between; align-items: center;
-      background-color: #f1f8e9; padding: 15px; border-radius: 15px; margin-top: 20px;
-      border: 2px solid #c5e1a5;
-    }
+    .dashboard { display: flex; justify-content: space-between; align-items: center; background-color: #f1f8e9; padding: 15px; border-radius: 15px; margin-top: 20px; border: 2px solid #c5e1a5; }
     .score-text { font-size: 20px; color: #333; font-weight: bold; }
     
-    .hint-btn {
-      background-color: #9c27b0; color: white; border: none; padding: 10px 15px;
-      border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer;
-      box-shadow: 0 3px 0 #6a1b9a;
-    }
+    .hint-btn { background-color: #9c27b0; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 0 #6a1b9a; }
     .hint-btn:active { transform: translateY(3px); box-shadow: none; }
-    
-    .reset-btn {
-      background-color: #ef5350; color: white; border: none; padding: 10px 20px;
-      border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 10px; font-weight: bold;
-    }
+    .reset-btn { background-color: #ef5350; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 10px; font-weight: bold; }
 
-    #practiceReport {
-      display: none; background-color: #fff3e0; border: 3px dashed #ffb300; border-radius: 15px;
-      padding: 20px; margin-top: 25px;
-    }
+    #practiceReport { display: none; background-color: #fff3e0; border: 3px dashed #ffb300; border-radius: 15px; padding: 20px; margin-top: 25px; }
     #practiceReport h3 { color: #e65100; margin-top: 0; font-size: 22px; }
     #missedWordsList { font-size: 20px; font-weight: bold; color: #333; margin-bottom: 10px; }
     #chatStatus { font-size: 14px; color: #4caf50; font-weight: bold; display: none; }
@@ -116,21 +113,29 @@
     
     <div id="startScreen">
       <p style="color: #666; margin-top: 0;">Choose your challenge level:</p>
-      <button class="mode-btn easy-btn" onclick="startApp('easy')">🥷 Ninja Training (Easy)</button>
-      <button class="mode-btn normal-btn" onclick="startApp('normal')">🦸‍♂️ Hero Mission (Normal)</button>
-      <button class="mode-btn hard-btn" onclick="startApp('hard')">🥊 Heavyweight Match (Hard)</button>
-      <button class="mode-btn test-btn" onclick="startApp('test')">🏆 The Boss Fight (Test)</button>
+      <button class="mode-btn study-btn" onclick="startApp('study')">🧙‍♂️ Wizard Academy (Study & Quiz)</button>
+      <button class="mode-btn memory-btn" onclick="startApp('memory')">🕵️‍♂️ Secret Agent (Flashcards)</button>
+      <button class="mode-btn easy-btn" onclick="startApp('easy')">🥷 Ninja Training (Scramble - Easy)</button>
+      <button class="mode-btn normal-btn" onclick="startApp('normal')">🦸‍♂️ Hero Mission (Scramble - Normal)</button>
+      <button class="mode-btn hard-btn" onclick="startApp('hard')">🥊 Heavyweight (Scramble - Hard)</button>
+      <button class="mode-btn test-btn" onclick="startApp('test')">🏆 The Boss Fight (Typing Test)</button>
     </div>
 
     <div id="mainUI">
       <div class="progress-text" id="progressText">Word 1 of ?</div>
       
+      <div id="studyMessage">Listen and Learn! 🧠</div>
+
       <div class="audio-controls" id="audioControls">
         <button class="action-btn" onclick="speakWord()">🔊 Hear Word</button>
         <button class="action-btn sentence-btn" onclick="speakSentence()">💬 Hear Sentence</button>
       </div>
       
+      <div id="countdownTimer">5</div>
       <div id="answerBox"></div>
+      
+      <div id="mcContainer"></div>
+
       <div id="lettersContainer"></div>
       <button class="reset-btn" id="resetBtn" onclick="resetCurrentWord()">🔄 Oops! Clear Letters</button>
 
@@ -175,16 +180,25 @@
     let currentAnswer = "";
     let correctWord = "";
     let missedWords = new Set(); 
-    let activeMode = "normal";
+    let activeMode = "";
+    
+    // Special states for the new modes
+    let isStudyPhase = false;
+    let timerInterval;
 
     function startApp(mode) {
       activeMode = mode;
+      // Shuffle the words to guarantee a random start every time!
       wordList = [...originalWordList].sort(() => Math.random() - 0.5);
 
       document.getElementById("startScreen").style.display = "none";
       document.getElementById("mainUI").style.display = "block";
 
-      // Set the title based on the mode!
+      if (activeMode === "study") {
+        document.getElementById("mainTitle").innerText = "🧙‍♂️ Wizard Academy 🧙‍♂️";
+        isStudyPhase = true;
+      }
+      if (activeMode === "memory") document.getElementById("mainTitle").innerText = "🕵️‍♂️ Secret Agent Memory 🕵️‍♂️";
       if (activeMode === "easy") document.getElementById("mainTitle").innerText = "🥷 Ninja Training 🥷";
       if (activeMode === "normal") document.getElementById("mainTitle").innerText = "🦸‍♂️ Hero Mission 🦸‍♂️";
       if (activeMode === "hard") document.getElementById("mainTitle").innerText = "🥊 Heavyweight Match 🥊";
@@ -201,22 +215,82 @@
       loadNextWord();
     }
 
+    // A helper function to create confusing "trick" words for the multiple choice
+    function generateTrickWords(correct) {
+      let options = new Set();
+      options.add(correct);
+      
+      const alphabet = "abcdefghijklmnopqrstuvwxyz";
+      
+      while (options.size < 4) {
+        let arr = correct.split('');
+        let rand = Math.random();
+        
+        if (arr.length > 2 && rand < 0.33) {
+          // Swap two adjacent letters (e.g., down -> dwon)
+          let idx = Math.floor(Math.random() * (arr.length - 1));
+          let temp = arr[idx]; arr[idx] = arr[idx+1]; arr[idx+1] = temp;
+          options.add(arr.join(''));
+        } else if (rand < 0.66) {
+          // Double a letter (e.g., how -> howw)
+          let idx = Math.floor(Math.random() * arr.length);
+          arr[idx] = arr[idx] + arr[idx];
+          options.add(arr.join(''));
+        } else {
+          // Replace a letter with a random letter (e.g., call -> cill)
+          let idx = Math.floor(Math.random() * arr.length);
+          arr[idx] = alphabet[Math.floor(Math.random() * alphabet.length)];
+          options.add(arr.join(''));
+        }
+      }
+      // Return the 4 options shuffled randomly so the correct answer is always moving!
+      return Array.from(options).sort(() => Math.random() - 0.5);
+    }
+
     function speakWord() {
       if (currentWordIndex < wordList.length) {
-        let msg = new SpeechSynthesisUtterance(wordList[currentWordIndex].word);
-        window.speechSynthesis.speak(msg);
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(wordList[currentWordIndex].word));
       }
     }
 
     function speakSentence() {
       if (currentWordIndex < wordList.length) {
-        let msg = new SpeechSynthesisUtterance(wordList[currentWordIndex].sentence);
-        window.speechSynthesis.speak(msg);
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(wordList[currentWordIndex].sentence));
       }
+    }
+
+    function playStudyAudioSequence() {
+      // 1. Read Word
+      window.speechSynthesis.speak(new SpeechSynthesisUtterance(correctWord));
+      // 2. Spell out the word (putting commas makes it read individual letters!)
+      let spelledOut = correctWord.split('').join(', ');
+      window.speechSynthesis.speak(new SpeechSynthesisUtterance(spelledOut));
+      // 3. Read the sentence
+      let sent = new SpeechSynthesisUtterance(wordList[currentWordIndex].sentence);
+      
+      // When the sentence finishes, wait 1.5 seconds and move to the next word
+      sent.onend = function() {
+        setTimeout(() => {
+          currentWordIndex++;
+          loadNextWord();
+        }, 1500);
+      };
+      window.speechSynthesis.speak(sent);
     }
 
     function loadNextWord() {
       if (currentWordIndex >= wordList.length) {
+        // If we are in Study mode and just finished Phase 1, switch to Phase 2 (The Quiz!)
+        if (activeMode === "study" && isStudyPhase) {
+          isStudyPhase = false;
+          currentWordIndex = 0;
+          wordList = [...originalWordList].sort(() => Math.random() - 0.5); // Reshuffle for the quiz
+          document.getElementById("studyMessage").style.display = "none";
+          alert("Study phase complete! Now it's time for the quiz! 🧙‍♂️");
+          loadNextWord(); // Start the quiz
+          return;
+        }
+        
         endSession();
         return;
       }
@@ -225,24 +299,70 @@
       correctWord = wordList[currentWordIndex].word.toLowerCase();
       document.getElementById("feedback").innerText = "";
       
-      if (activeMode === "easy" || activeMode === "normal" || activeMode === "hard") {
+      // --- STUDY MODE (PHASE 1) ---
+      if (activeMode === "study" && isStudyPhase) {
+        document.getElementById("studyMessage").style.display = "block";
+        document.getElementById("answerBox").style.display = "block";
+        document.getElementById("answerBox").innerText = correctWord.toUpperCase();
+        document.getElementById("audioControls").style.display = "none";
+        document.getElementById("gameDashboard").style.display = "none";
+        
+        playStudyAudioSequence();
+      } 
+      
+      // --- STUDY MODE (PHASE 2) OR MEMORY MODE ---
+      else if ((activeMode === "study" && !isStudyPhase) || activeMode === "memory") {
+        document.getElementById("audioControls").style.display = "flex";
+        document.getElementById("gameDashboard").style.display = "none"; // Hide hint for multiple choice
+        document.getElementById("mcContainer").style.display = "none";
+        document.getElementById("answerBox").style.display = "block";
+        
+        if (activeMode === "memory") {
+          // FLASHCARD LOGIC
+          document.getElementById("answerBox").innerText = correctWord.toUpperCase();
+          document.getElementById("countdownTimer").style.display = "block";
+          document.getElementById("audioControls").style.display = "none"; // Hide audio during flashcard
+          speakWord(); // Say it once
+          
+          let timeLeft = 5;
+          document.getElementById("countdownTimer").innerText = timeLeft;
+          
+          timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById("countdownTimer").innerText = timeLeft;
+            if (timeLeft <= 0) {
+              clearInterval(timerInterval);
+              document.getElementById("countdownTimer").style.display = "none";
+              document.getElementById("answerBox").style.display = "none"; // Hide the word!
+              document.getElementById("audioControls").style.display = "flex"; // Show audio so he can hear it
+              showMultipleChoice();
+            }
+          }, 1000);
+        } else {
+          // STUDY QUIZ LOGIC (No timer, just multiple choice)
+          document.getElementById("answerBox").style.display = "none";
+          speakWord();
+          showMultipleChoice();
+        }
+      }
+
+      // --- SCRAMBLE MODES (Easy, Normal, Hard) ---
+      else if (activeMode === "easy" || activeMode === "normal" || activeMode === "hard") {
         currentAnswer = "";
         document.getElementById("answerBox").innerText = "";
+        document.getElementById("gameDashboard").style.display = "flex";
         
         let letters = correctWord.split("");
         const alphabet = "abcdefghijklmnopqrstuvwxyz";
         
-        // 🔥 THE DIFFICULTY LOGIC 🔥
         let decoyCount = 0;
-        if (activeMode === "normal") decoyCount = 2; // Normal gets 2 decoys
-        if (activeMode === "hard") decoyCount = 5;   // Hard gets 5 decoys!
+        if (activeMode === "normal") decoyCount = 2; 
+        if (activeMode === "hard") decoyCount = 5;   
         
-        // Add the extra letters based on the mode
         for (let i = 0; i < decoyCount; i++) {
           letters.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
         }
 
-        // Shuffle all the letters together
         for (let i = letters.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [letters[i], letters[j]] = [letters[j], letters[i]];
@@ -259,11 +379,57 @@
           container.appendChild(btn);
         });
 
-      } else if (activeMode === "test") {
+      } 
+      
+      // --- TEST MODE ---
+      else if (activeMode === "test") {
         const inputField = document.getElementById("testInput");
         inputField.value = "";
         inputField.focus();
         setTimeout(speakWord, 500); 
+      }
+    }
+
+    function showMultipleChoice() {
+      const container = document.getElementById("mcContainer");
+      container.innerHTML = "";
+      container.style.display = "grid";
+      
+      // Generates 1 correct word and 3 tricky ones
+      let options = generateTrickWords(correctWord);
+      
+      options.forEach(opt => {
+        let btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.className = "mc-btn";
+        btn.onclick = function() { checkMultipleChoice(opt); };
+        container.appendChild(btn);
+      });
+    }
+
+    function checkMultipleChoice(selectedWord) {
+      document.getElementById("mcContainer").style.display = "none";
+      const feedback = document.getElementById("feedback");
+
+      if (selectedWord === correctWord) {
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance("Good job!"));
+        feedback.innerText = "🎉 PERFECT! 🎉";
+        feedback.style.color = "#4caf50";
+        score++;
+        document.getElementById("score").innerText = score;
+        currentWordIndex++;
+        setTimeout(loadNextWord, 1500);
+      } else {
+        try { document.getElementById("failSound").currentTime = 0; document.getElementById("failSound").play(); } catch(e) {}
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance("Uh oh!"));
+        feedback.innerText = "Oops! Back of the line! 🔄";
+        feedback.style.color = "#f44336";
+        
+        missedWords.add(correctWord);
+        wordList.push(wordList[currentWordIndex]); 
+        
+        currentWordIndex++;
+        setTimeout(loadNextWord, 1500);
       }
     }
 
@@ -343,6 +509,7 @@
 
     function endSession() {
       document.getElementById("lettersContainer").style.display = "none";
+      document.getElementById("mcContainer").style.display = "none";
       document.getElementById("answerBox").style.display = "none";
       document.getElementById("testInputContainer").style.display = "none";
       document.getElementById("audioControls").style.display = "none";
@@ -351,7 +518,7 @@
       document.getElementById("progressText").innerText = "All done!";
 
       const totalWords = originalWordList.length;
-      const percentage = Math.round((score / totalWords) * 100); // Rounds the percentage nicely
+      const percentage = Math.round((score / totalWords) * 100); 
 
       const feedbackEl = document.getElementById("feedback");
       const reportTitle = document.getElementById("reportTitle");
@@ -380,11 +547,12 @@
 
       const chatWebhookURL = "https://chat.googleapis.com/v1/spaces/AAQA6stRJYk/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=2B8KzPKO4GYs6rzZcwBFbmCJaWTNds5zqIMHJhdRG1g";
       
-      // Makes the mode name look nice in your Google Chat report!
       let niceModeName = "Game";
       if(activeMode === "easy") niceModeName = "Ninja Training (Easy)";
       if(activeMode === "normal") niceModeName = "Hero Mission (Normal)";
       if(activeMode === "hard") niceModeName = "Heavyweight Match (Hard)";
+      if(activeMode === "memory") niceModeName = "Secret Agent Memory (Flashcards)";
+      if(activeMode === "study") niceModeName = "Wizard Academy (Study & Quiz)";
       if(activeMode === "test") niceModeName = "Boss Fight (Test)";
 
       const finalMsg = missedWords.size > 0 
